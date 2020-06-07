@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  rules:
+  - host: longhorn.ns.wg 
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: longhorn-frontend 
+          servicePort: 80
