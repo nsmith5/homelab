@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: nextcloud
+  annotations:
+    ingress.kubernetes.io/ssl-passthrough: https
+spec:
+  rules:
+  - host: nextcloud.ns.wg 
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nextcloud
+          servicePort: 8080
