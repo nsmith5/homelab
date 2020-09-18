@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: prometheus
 spec:
@@ -7,29 +7,48 @@ spec:
   selector:
     matchLabels:
       app: prometheus
+  serviceName: prometheus
   template:
     metadata:
       labels:
         app: prometheus
     spec:
       serviceAccountName: prometheus
+      initContainers:
+      - name: "init-chown-data"
+        image: debian:9
+        command: ["chown", "-R", "65534:65534", "/data"]
+        volumeMounts:
+        - name: data
+          mountPath: /data
+          subPath: ""
       containers:
       - name: prometheus
         image: prom/prometheus
         args:
         - "--config.file=/etc/prometheus/prometheus.yml"
-        - "--storage.tsdb.path=/prometheus/"
+        - "--storage.tsdb.path=/data/prometheus/"
         ports:
         - containerPort: 9090
         volumeMounts:
           - name: config
             mountPath: /etc/prometheus/
           - name: data
-            mountPath: /prometheus/
+            mountPath: /data/prometheus/
+        securityContext:
+          runAsUser: 65534
+          runAsGroup: 65534
       volumes:
       - name: config
         configMap:
           defaultMode: 420
           name: prometheus
-      - name: data
-        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 4Gi

@@ -1,6 +1,6 @@
 resources:
 - rbac.yaml
 - config.yaml
-- deployment.yaml
+- statefulset.yaml
 - service.yaml
 - ingress.yaml
